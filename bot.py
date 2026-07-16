@@ -79,6 +79,20 @@ def callback(call):
             "📞 شماره تماس: 0912XXXXXXX"
         )
 
+
+    elif call.data == "feedback":
+    bot.answer_callback_query(call.id)
+
+    msg = bot.send_message(
+        call.message.chat.id,
+        "⭐ لطفاً نظر خود را بنویسید."
+    )
+
+    bot.register_next_step_handler(
+        msg,
+        send_feedback
+    )   
+
 def send_to_admin(message, ticket_id):
 
     username = (
@@ -167,7 +181,35 @@ def user_chat(message):
         ticket_id
     )
 
+def send_feedback(message):
 
+    username = message.from_user.username
+
+    if username:
+        username = "@" + username
+    else:
+        username = "ندارد"
+
+    text = f"""
+⭐ نظر جدید
+
+👤 {message.from_user.first_name}
+🆔 {username}
+
+💬
+{message.text}
+"""
+
+    bot.send_message(
+        ADMIN_ID,
+        text
+    )
+
+    bot.send_message(
+        message.chat.id,
+        "❤️ ممنون، نظر شما ثبت شد."
+    )
+    
 print("Bot Started...")
 
 bot.infinity_polling(skip_pending=True)    

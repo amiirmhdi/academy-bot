@@ -1,15 +1,18 @@
-from telebot import types
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def main_menu():
+    markup = InlineKeyboardMarkup(row_width=1)
 
-    markup = types.InlineKeyboardMarkup()
+    markup.add(
+        InlineKeyboardButton("📚 دوره‌ها", callback_data="courses")
+    )
 
-    btn1 = types.InlineKeyboardButton("🎓 ثبت نام", callback_data="register")
-    btn2 = types.InlineKeyboardButton("📚 دوره ها", callback_data="courses")
-    btn3 = types.InlineKeyboardButton("👩🏻‍🏫 مشاوره", callback_data="advisor")
-    btn4 = types.InlineKeyboardButton("📞 ارتباط با ما", callback_data="contact")
+    markup.add(
+        InlineKeyboardButton("👩🏻‍🏫 مشاوره", callback_data="advisor")
+    )
 
-    markup.row(btn1, btn2)
-    markup.row(btn3, btn4)
+    markup.add(
+        InlineKeyboardButton("⭐ نظر شما", callback_data="feedback")
+    )
 
     return markup
