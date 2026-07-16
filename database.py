@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "data/arakbot.db"
+DB_NAME = "arakbot.db"
 
 
 def init_db():
