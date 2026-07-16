@@ -35,21 +35,12 @@ def callback(call):
 
     bot.answer_callback_query(call.id)
 
-    if call.data == "register":
-
-        bot.send_message(
-            call.message.chat.id,
-            "📝 بخش ثبت نام به زودی فعال می‌شود."
-        )
-
-
-    elif call.data == "courses":
+    if call.data == "courses":
 
         bot.send_message(
             call.message.chat.id,
             "📚 لیست دوره‌ها به زودی اضافه می‌شود."
         )
-
 
     elif call.data == "advisor":
 
@@ -71,27 +62,17 @@ def callback(call):
             ticket_id
         )
 
+    elif call.data == "feedback":
 
-    elif call.data == "contact":
-
-        bot.send_message(
+        msg = bot.send_message(
             call.message.chat.id,
-            "📞 شماره تماس: 0912XXXXXXX"
+            "⭐ لطفاً نظر خود را بنویسید."
         )
 
-
-    elif call.data == "feedback":
-    bot.answer_callback_query(call.id)
-
-    msg = bot.send_message(
-        call.message.chat.id,
-        "⭐ لطفاً نظر خود را بنویسید."
-    )
-
-    bot.register_next_step_handler(
-        msg,
-        send_feedback
-    )   
+        bot.register_next_step_handler(
+            msg,
+            send_feedback
+        )   
 
 def send_to_admin(message, ticket_id):
 
