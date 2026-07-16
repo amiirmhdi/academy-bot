@@ -82,7 +82,7 @@ def send_to_admin(message, ticket_id):
         else "ندارد"
     )
 
-    caption = f"""🎫 تیکت #{ticket_id}
+    header = f"""🎫 تیکت #{ticket_id}
 
 👤 {message.from_user.first_name}
 🆔 {username}
@@ -91,14 +91,14 @@ def send_to_admin(message, ticket_id):
 
     if message.content_type == "text":
 
-        bot.send_message(
+        sent = bot.send_message(
             ADMIN_ID,
-            f"{caption}\n\n💬\n{message.text}"
+            f"{header}\n💬\n{message.text}"
         )
 
     else:
 
-        bot.forward_message(
+        sent = bot.forward_message(
             ADMIN_ID,
             message.chat.id,
             message.message_id
@@ -106,8 +106,13 @@ def send_to_admin(message, ticket_id):
 
         bot.send_message(
             ADMIN_ID,
-            caption
+            header
         )
+
+    reply_map[sent.message_id] = (
+        message.chat.id,
+        ticket_id
+    )
 
     bot.send_message(
         message.chat.id,
@@ -117,36 +122,37 @@ def send_to_admin(message, ticket_id):
 @bot.message_handler(func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message)
 def admin_reply(message):
 
-    reply_text = message.reply_to_message.text
-
-    if "USER_ID:" not in reply_text:
+    if message.reply_to_message.message_id not in reply_map:
         bot.reply_to(
             message,
-            "❌ این پیام متعلق به کاربر نیست."
+            "❌ روی پیام کاربر ریپلای کنید."
         )
         return
 
-    user_id = int(
-        reply_text.split("USER_ID:")[1].split("\n")[0]
-    )
+    user_id, ticket_id = reply_map[
+        message.reply_to_message.message_id
+    ]
+
+    if (
+        message.content_type == "text"
+        and message.text.strip() == "/close"
+    ):
+
+        close_ticket(user_id)
+
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+        )
+
+        bot.reply_to(
+            message,
+            "✅ تیکت بسته شد."
+        )
+
+        return
 
     if message.content_type == "text":
-
-        if message.text.strip() == "/close":
-
-            close_ticket(user_id)
-
-            bot.send_message(
-                user_id,
-                "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
-            )
-
-            bot.reply_to(
-                message,
-                "✅ تیکت بسته شد."
-            )
-
-            return
 
         bot.send_message(
             user_id,
