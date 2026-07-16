@@ -89,30 +89,31 @@ def send_to_admin(message, ticket_id):
 📌 USER_ID:{message.chat.id}
 """
 
+    info = bot.send_message(
+        ADMIN_ID,
+        header
+    )
+
+    reply_map[info.message_id] = (
+        message.chat.id,
+        ticket_id
+    )
+
     if message.content_type == "text":
 
-        sent = bot.send_message(
+        bot.send_message(
             ADMIN_ID,
-            f"{header}\n💬\n{message.text}"
+            message.text,
+            reply_to_message_id=info.message_id
         )
 
     else:
 
-        sent = bot.forward_message(
+        bot.forward_message(
             ADMIN_ID,
             message.chat.id,
             message.message_id
         )
-
-        bot.send_message(
-            ADMIN_ID,
-            header
-        )
-
-    reply_map[sent.message_id] = (
-        message.chat.id,
-        ticket_id
-    )
 
     bot.send_message(
         message.chat.id,
@@ -125,7 +126,7 @@ def admin_reply(message):
     if message.reply_to_message.message_id not in reply_map:
         bot.reply_to(
             message,
-            "❌ روی پیام کاربر ریپلای کنید."
+            "❌ روی پیام اطلاعات تیکت ریپلای کنید."
         )
         return
 
@@ -133,26 +134,23 @@ def admin_reply(message):
         message.reply_to_message.message_id
     ]
 
-    if (
-        message.content_type == "text"
-        and message.text.strip() == "/close"
-    ):
-
-        close_ticket(user_id)
-
-        bot.send_message(
-            user_id,
-            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
-        )
-
-        bot.reply_to(
-            message,
-            "✅ تیکت بسته شد."
-        )
-
-        return
-
     if message.content_type == "text":
+
+        if message.text.strip() == "/close":
+
+            close_ticket(user_id)
+
+            bot.send_message(
+                user_id,
+                "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+            )
+
+            bot.reply_to(
+                message,
+                "✅ تیکت بسته شد."
+            )
+
+            return
 
         bot.send_message(
             user_id,
@@ -161,10 +159,10 @@ def admin_reply(message):
 
     else:
 
-        bot.forward_message(
-            user_id,
-            ADMIN_ID,
-            message.message_id
+        bot.copy_message(
+            chat_id=user_id,
+            from_chat_id=ADMIN_ID,
+            message_id=message.message_id
         )
 
     bot.reply_to(
