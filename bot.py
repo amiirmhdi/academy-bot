@@ -82,20 +82,32 @@ def send_to_admin(message, ticket_id):
         else "ندارد"
     )
 
-    text = f"""🎫 تیکت #{ticket_id}
+    caption = f"""🎫 تیکت #{ticket_id}
 
 👤 {message.from_user.first_name}
 🆔 {username}
 📌 USER_ID:{message.chat.id}
-
-💬
-{message.text}
 """
 
-    bot.send_message(
-        ADMIN_ID,
-        text
-    )
+    if message.content_type == "text":
+
+        bot.send_message(
+            ADMIN_ID,
+            f"{caption}\n\n💬\n{message.text}"
+        )
+
+    else:
+
+        bot.forward_message(
+            ADMIN_ID,
+            message.chat.id,
+            message.message_id
+        )
+
+        bot.send_message(
+            ADMIN_ID,
+            caption
+        )
 
     bot.send_message(
         message.chat.id,
@@ -118,26 +130,36 @@ def admin_reply(message):
         reply_text.split("USER_ID:")[1].split("\n")[0]
     )
 
-    if message.text.strip() == "/close":
+    if message.content_type == "text":
 
-        close_ticket(user_id)
+        if message.text.strip() == "/close":
+
+            close_ticket(user_id)
+
+            bot.send_message(
+                user_id,
+                "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+            )
+
+            bot.reply_to(
+                message,
+                "✅ تیکت بسته شد."
+            )
+
+            return
 
         bot.send_message(
             user_id,
-            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+            f"👩🏻‍🏫 مشاور:\n\n{message.text}"
         )
 
-        bot.reply_to(
-            message,
-            "✅ تیکت بسته شد."
+    else:
+
+        bot.forward_message(
+            user_id,
+            ADMIN_ID,
+            message.message_id
         )
-
-        return
-
-    bot.send_message(
-        user_id,
-        f"👩🏻‍🏫 مشاور:\n\n{message.text}"
-    )
 
     bot.reply_to(
         message,
@@ -190,6 +212,37 @@ def send_feedback(message):
         message.chat.id,
         "❤️ ممنون، نظر شما ثبت شد."
     )
+
+@bot.message_handler(content_types=[
+    "photo",
+    "video",
+    "document",
+    "audio",
+    "voice",
+    "animation",
+    "sticker",
+    "video_note"
+])
+def media_handler(message):
+
+    ticket = get_open_ticket(message.chat.id)
+
+    if not ticket:
+        return
+
+    ticket_id = ticket[0]
+
+    bot.forward_message(
+        ADMIN_ID,
+        message.chat.id,
+        message.message_id
+    )
+
+    reply_map[message.message_id] = (
+        message.chat.id,
+        ticket_id
+    )
+
     
 print("Bot Started...")
 
