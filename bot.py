@@ -12,6 +12,8 @@ from database import (
 
 bot = telebot.TeleBot(TOKEN)
 
+reply_map = {}
+
 init_db()
 
 
@@ -82,26 +84,18 @@ def send_to_admin(message, ticket_id):
         else "ندارد"
     )
 
-    header = f"""🎫 تیکت #{ticket_id}
+    info = bot.send_message(
+        ADMIN_ID,
+        f"""🎫 تیکت #{ticket_id}
 
 👤 {message.from_user.first_name}
 🆔 {username}
-📌 USER_ID:{message.chat.id}
-"""
-
-    info = bot.send_message(
-        ADMIN_ID,
-        header
-    )
-
-    reply_map[info.message_id] = (
-        message.chat.id,
-        ticket_id
+📌 USER_ID:{message.chat.id}"""
     )
 
     if message.content_type == "text":
 
-        bot.send_message(
+        sent = bot.send_message(
             ADMIN_ID,
             message.text,
             reply_to_message_id=info.message_id
@@ -109,48 +103,56 @@ def send_to_admin(message, ticket_id):
 
     else:
 
-        bot.forward_message(
+        sent = bot.forward_message(
             ADMIN_ID,
             message.chat.id,
             message.message_id
         )
+
+    reply_map[info.message_id] = message.chat.id
+    reply_map[sent.message_id] = message.chat.id
 
     bot.send_message(
         message.chat.id,
         "✅ پیام شما برای مشاور ارسال شد."
     )
 
-@bot.message_handler(func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message)
+@bot.message_handler(
+    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message
+)
 def admin_reply(message):
 
-    if message.reply_to_message.message_id not in reply_map:
+    reply_id = message.reply_to_message.message_id
+
+    if reply_id not in reply_map:
         bot.reply_to(
             message,
-            "❌ روی پیام اطلاعات تیکت ریپلای کنید."
+            "❌ روی پیام کاربر ریپلای کنید."
         )
         return
 
-    user_id, ticket_id = reply_map[
-        message.reply_to_message.message_id
-    ]
+    user_id = reply_map[reply_id]
+
+    if (
+        message.content_type == "text"
+        and message.text.strip() == "/close"
+    ):
+
+        close_ticket(user_id)
+
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+        )
+
+        bot.reply_to(
+            message,
+            "✅ تیکت بسته شد."
+        )
+
+        return
 
     if message.content_type == "text":
-
-        if message.text.strip() == "/close":
-
-            close_ticket(user_id)
-
-            bot.send_message(
-                user_id,
-                "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
-            )
-
-            bot.reply_to(
-                message,
-                "✅ تیکت بسته شد."
-            )
-
-            return
 
         bot.send_message(
             user_id,
@@ -160,9 +162,9 @@ def admin_reply(message):
     else:
 
         bot.copy_message(
-            chat_id=user_id,
-            from_chat_id=ADMIN_ID,
-            message_id=message.message_id
+            user_id,
+            ADMIN_ID,
+            message.message_id
         )
 
     bot.reply_to(
@@ -170,38 +172,35 @@ def admin_reply(message):
         "✅ ارسال شد."
     )
 
-@bot.message_handler(func=lambda message: True)
+@bot.message_handler(
+    func=lambda m: m.chat.id != ADMIN_ID,
+    content_types=["text"]
+)
 def user_chat(message):
-
-    if message.chat.id == ADMIN_ID:
-        return
 
     ticket = get_open_ticket(message.chat.id)
 
     if not ticket:
         return
 
-    ticket_id = ticket[0]
-
     send_to_admin(
         message,
-        ticket_id
+        ticket[0]
     )
 
 def send_feedback(message):
 
-    username = message.from_user.username
+    username = (
+        "@" + message.from_user.username
+        if message.from_user.username
+        else "ندارد"
+    )
 
-    if username:
-        username = "@" + username
-    else:
-        username = "ندارد"
-
-    text = f"""
-⭐ نظر جدید
+    text = f"""⭐️ نظر جدید
 
 👤 {message.from_user.first_name}
 🆔 {username}
+📌 USER_ID:{message.chat.id}
 
 💬
 {message.text}
@@ -229,22 +228,17 @@ def send_feedback(message):
 ])
 def media_handler(message):
 
+    if message.chat.id == ADMIN_ID:
+        return
+
     ticket = get_open_ticket(message.chat.id)
 
     if not ticket:
         return
 
-    ticket_id = ticket[0]
-
-    bot.forward_message(
-        ADMIN_ID,
-        message.chat.id,
-        message.message_id
-    )
-
-    reply_map[message.message_id] = (
-        message.chat.id,
-        ticket_id
+    send_to_admin(
+        message,
+        ticket[0]
     )
 
     
