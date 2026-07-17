@@ -112,7 +112,8 @@ def send_to_admin(message, ticket_id):
 
 👤 {message.from_user.first_name}
 🆔 {username}
-📌 USER_ID:{message.chat.id}"""
+📌 USER_ID:{message.chat.id}""",
+        reply_markup=admin_close_btn(message.chat.id)
     )
 
     if message.content_type == "text":
