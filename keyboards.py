@@ -13,18 +13,3 @@ def main_menu():
     )
 
     return markup
-
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-def admin_close_btn(user_id):
-
-    markup = InlineKeyboardMarkup()
-
-    markup.add(
-        InlineKeyboardButton(
-            "🔒 بستن تیکت",
-            callback_data=f"close_ticket:{user_id}"
-        )
-    )
-
-    return markup

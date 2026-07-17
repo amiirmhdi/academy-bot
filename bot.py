@@ -1,6 +1,6 @@
 import telebot
 
-from keyboards import main_menu, admin_close_btn
+from keyboards import main_menu
 from config import TOKEN, ADMIN_ID
 from database import (
     init_db,
@@ -68,34 +68,12 @@ def callback(call):
 
         msg = bot.send_message(
             call.message.chat.id,
-            "⭐️ لطفاً نظر خود را بنویسید."
+            "⭐ لطفاً نظر خود را بنویسید."
         )
 
         bot.register_next_step_handler(
             msg,
             send_feedback
-        )
-
-    elif call.data.startswith("close_ticket:"):
-
-        user_id = int(call.data.split(":")[1])
-
-        close_ticket(user_id)
-
-        bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None
-        )
-
-        bot.send_message(
-            user_id,
-            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
-        )
-
-        bot.send_message(
-            ADMIN_ID,
-            "✅ تیکت بسته شد."
         )   
 
 def send_to_admin(message, ticket_id):
@@ -112,8 +90,7 @@ def send_to_admin(message, ticket_id):
 
 👤 {message.from_user.first_name}
 🆔 {username}
-📌 USER_ID:{message.chat.id}""",
-        reply_markup=admin_close_btn(message.chat.id)
+📌 USER_ID:{message.chat.id}"""
     )
 
     if message.content_type == "text":
@@ -141,18 +118,7 @@ def send_to_admin(message, ticket_id):
     )
 
 @bot.message_handler(
-    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
-    content_types=[
-        "text",
-        "photo",
-        "video",
-        "document",
-        "audio",
-        "voice",
-        "animation",
-        "sticker",
-        "video_note"
-    ]
+    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message
 )
 def admin_reply(message):
 
@@ -196,9 +162,9 @@ def admin_reply(message):
     else:
 
         bot.copy_message(
-            chat_id=user_id,
-            from_chat_id=ADMIN_ID,
-            message_id=message.message_id
+            user_id,
+            ADMIN_ID,
+            message.message_id
         )
 
     bot.reply_to(
