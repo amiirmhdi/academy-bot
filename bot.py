@@ -118,7 +118,18 @@ def send_to_admin(message, ticket_id):
     )
 
 @bot.message_handler(
-    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message
+    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
+    content_types=[
+        "text",
+        "photo",
+        "video",
+        "document",
+        "audio",
+        "voice",
+        "animation",
+        "sticker",
+        "video_note"
+    ]
 )
 def admin_reply(message):
 
@@ -162,9 +173,9 @@ def admin_reply(message):
     else:
 
         bot.copy_message(
-            user_id,
-            ADMIN_ID,
-            message.message_id
+            chat_id=user_id,
+            from_chat_id=ADMIN_ID,
+            message_id=message.message_id
         )
 
     bot.reply_to(
