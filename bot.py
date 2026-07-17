@@ -68,13 +68,34 @@ def callback(call):
 
         msg = bot.send_message(
             call.message.chat.id,
-            "⭐ لطفاً نظر خود را بنویسید."
+            "⭐️ لطفاً نظر خود را بنویسید."
         )
 
         bot.register_next_step_handler(
             msg,
             send_feedback
-        )   
+        )
+
+    elif call.data.startswith("admin_close_"):
+
+        user_id = int(call.data.split("_")[2])
+
+        close_ticket(user_id)
+
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
+
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+        )
+
+        bot.answer_callback_query(
+            call.id,
+            "✅ تیکت بسته شد   
 
 def send_to_admin(message, ticket_id):
 
