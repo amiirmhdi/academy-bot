@@ -18,13 +18,13 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def admin_close_btn(user_id):
 
-    kb = InlineKeyboardMarkup()
+    markup = InlineKeyboardMarkup()
 
-    kb.add(
+    markup.add(
         InlineKeyboardButton(
             "🔒 بستن تیکت",
-            callback_data=f"admin_close_{user_id}"
+            callback_data=f"close_ticket:{user_id}"
         )
     )
 
-    return kb
+    return markup

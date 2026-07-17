@@ -76,9 +76,9 @@ def callback(call):
             send_feedback
         )
 
-    elif call.data.startswith("admin_close_"):
+    elif call.data.startswith("close_ticket:"):
 
-        user_id = int(call.data.split("_")[2])
+        user_id = int(call.data.split(":")[1])
 
         close_ticket(user_id)
 
@@ -93,14 +93,9 @@ def callback(call):
             "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
         )
 
-        bot.answer_callback_query(
-            call.id,
-            "✅ تیکت بسته شد."
-        )
-
         bot.send_message(
             ADMIN_ID,
-            "✅ تیکت با موفقیت بسته شد."
+            "✅ تیکت بسته شد."
         )   
 
 def send_to_admin(message, ticket_id):
@@ -111,20 +106,14 @@ def send_to_admin(message, ticket_id):
         else "ندارد"
     )
 
-    header = f"""🎫 تیکت #{ticket_id}
+    info = bot.send_message(
+        ADMIN_ID,
+        f"""🎫 تیکت #{ticket_id}
 
 👤 {message.from_user.first_name}
 🆔 {username}
-📌 USER_ID:{message.chat.id}
-"""
-
-    info = bot.send_message(
-        ADMIN_ID,
-        header,
-        reply_markup=admin_close_btn(message.chat.id)
+📌 USER_ID:{message.chat.id}"""
     )
-
-    reply_map[info.message_id] = message.chat.id
 
     if message.content_type == "text":
 
@@ -142,10 +131,13 @@ def send_to_admin(message, ticket_id):
             message.message_id
         )
 
+    reply_map[info.message_id] = message.chat.id
     reply_map[sent.message_id] = message.chat.id
 
     bot.send_message(
         message.chat.id,
+        "✅ پیام شما برای مشاور ارسال شد."
+    )
 
 @bot.message_handler(
     func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
@@ -197,8 +189,7 @@ def admin_reply(message):
 
         bot.send_message(
             user_id,
-            f"👩🏻‍🏫 مشاور:\n\n{message.text}",
-            reply_markup=close_ticket_btn(user_id)
+            f"👩🏻‍🏫 مشاور:\n\n{message.text}"
         )
 
     else:
