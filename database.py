@@ -1,7 +1,9 @@
 import sqlite3
+import os
 
 DB_NAME = "arakbot.db"
 
+print("DB PATH:", os.path.abspath(DB_NAME))
 
 def init_db():
     conn = sqlite3.connect(DB_NAME)
