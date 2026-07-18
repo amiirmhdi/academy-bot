@@ -14,6 +14,8 @@ bot = telebot.TeleBot(TOKEN)
 
 reply_map = {}
 
+feedback_reply_map = {}
+
 init_db()
 
 
@@ -159,6 +161,34 @@ def admin_reply(message):
 
     reply_id = message.reply_to_message.message_id
 
+    # پاسخ به نظرسنجی
+    if reply_id in feedback_reply_map:
+
+        user_id = feedback_reply_map[reply_id]
+
+        if message.content_type == "text":
+
+            bot.send_message(
+                user_id,
+                f"💬 پاسخ آکادمی:\n\n{message.text}"
+            )
+
+        else:
+
+            bot.copy_message(
+                chat_id=user_id,
+                from_chat_id=ADMIN_ID,
+                message_id=message.message_id
+            )
+
+        bot.reply_to(
+            message,
+            "✅ پاسخ ارسال شد."
+        )
+
+        return
+
+    # پاسخ به تیکت
     if reply_id not in reply_map:
         bot.reply_to(
             message,
@@ -231,24 +261,66 @@ def send_feedback(message):
         else "ندارد"
     )
 
-    text = f"""⭐️ نظر جدید
+    text = f'''⭐ نظر جدید
 
-👤 {message.from_user.first_name}
-🆔 {username}
-📌 USER_ID:{message.chat.id}
+"{message.from_user.first_name}"
+{username}
 
 💬
-{message.text}
-"""
+{message.text}'''
 
-    bot.send_message(
+    info = bot.send_message(
         ADMIN_ID,
         text
     )
 
+    feedback_reply_map[info.message_id] = message.chat.id
+
     bot.send_message(
         message.chat.id,
         "❤️ ممنون، نظر شما ثبت شد."
+    )
+@bot.message_handler(
+    func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
+    content_types=[
+        "text",
+        "photo",
+        "video",
+        "document",
+        "audio",
+        "voice",
+        "animation",
+        "sticker",
+        "video_note"
+    ]
+)
+def admin_feedback_reply(message):
+
+    reply_id = message.reply_to_message.message_id
+
+    if reply_id not in feedback_reply_map:
+        return
+
+    user_id = feedback_reply_map[reply_id]
+
+    if message.content_type == "text":
+
+        bot.send_message(
+            user_id,
+            f"💬 پاسخ ادمین:\n\n{message.text}"
+        )
+
+    else:
+
+        bot.copy_message(
+            chat_id=user_id,
+            from_chat_id=ADMIN_ID,
+            message_id=message.message_id
+        )
+
+    bot.reply_to(
+        message,
+        "✅ پاسخ ارسال شد."
     )
 
 @bot.message_handler(content_types=[
