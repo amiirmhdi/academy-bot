@@ -1,6 +1,6 @@
 import telebot
 
-from keyboards import main_menu, admin_close_btn
+from keyboards import main_menu, admin_close_btn, admin_panel
 from config import TOKEN, ADMIN_ID
 from database import (
     init_db,
@@ -27,6 +27,16 @@ def start(message):
         message.from_user.first_name,
         message.from_user.username
     )
+
+    if message.chat.id == ADMIN_ID:
+
+        bot.send_message(
+            message.chat.id,
+            "🛠 پنل مدیریت",
+            reply_markup=admin_panel()
+        )
+
+        return
 
     bot.send_message(
         message.chat.id,

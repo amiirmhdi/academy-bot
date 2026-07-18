@@ -28,3 +28,17 @@ def admin_close_btn(user_id):
     )
 
     return markup
+
+
+def admin_panel():
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton(
+            "📢 ارسال همگانی",
+            callback_data="broadcast"
+        )
+    )
+
+    return markup
