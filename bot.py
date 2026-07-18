@@ -2,6 +2,8 @@ import telebot
 
 from keyboards import main_menu, admin_close_btn, admin_panel
 from config import TOKEN, ADMIN_ID
+from config import DATABASE_URL
+print("DATABASE_URL =", DATABASE_URL)
 from database import (
     init_db,
     add_user,
