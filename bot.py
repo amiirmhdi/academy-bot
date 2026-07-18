@@ -376,6 +376,11 @@ def broadcast_message(message):
 
     users = get_all_users()
 
+    print("=" * 50)
+    print("USERS:", users)
+    print("TOTAL USERS:", len(users))
+    print("=" * 50)
+
     success = 0
     failed = 0
 
@@ -384,6 +389,8 @@ def broadcast_message(message):
         chat_id = user[0]
 
         try:
+
+            print(f"Sending to: {chat_id}")
 
             if message.content_type == "text":
 
@@ -400,12 +407,19 @@ def broadcast_message(message):
                     message_id=message.message_id
                 )
 
+            print(f"SUCCESS -> {chat_id}")
             success += 1
 
         except Exception as e:
 
-            print(f"{chat_id} -> {e}")
+            print(f"FAILED -> {chat_id}")
+            print(e)
             failed += 1
+
+    print("=" * 50)
+    print(f"SUCCESS: {success}")
+    print(f"FAILED: {failed}")
+    print("=" * 50)
 
     bot.send_message(
         ADMIN_ID,
