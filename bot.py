@@ -1,6 +1,6 @@
 import telebot
 
-from keyboards import main_menu
+from keyboards import main_menu, admin_close_btn
 from config import TOKEN, ADMIN_ID
 from database import (
     init_db,
@@ -74,6 +74,28 @@ def callback(call):
         bot.register_next_step_handler(
             msg,
             send_feedback
+        )
+
+    elif call.data.startswith("admin_close:"):
+
+        user_id = int(call.data.split(":")[1])
+
+        close_ticket(user_id)
+
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
+
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+        )
+
+        bot.answer_callback_query(
+            call.id,
+            "✅ تیکت بسته شد."
         )   
 
 def send_to_admin(message, ticket_id):
@@ -90,8 +112,11 @@ def send_to_admin(message, ticket_id):
 
 👤 {message.from_user.first_name}
 🆔 {username}
-📌 USER_ID:{message.chat.id}"""
+📌 USER_ID:{message.chat.id}""",
+        reply_markup=admin_close_btn(message.chat.id)
     )
+
+    reply_map[info.message_id] = message.chat.id
 
     if message.content_type == "text":
 
@@ -109,7 +134,6 @@ def send_to_admin(message, ticket_id):
             message.message_id
         )
 
-    reply_map[info.message_id] = message.chat.id
     reply_map[sent.message_id] = message.chat.id
 
     bot.send_message(

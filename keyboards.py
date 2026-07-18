@@ -1,5 +1,6 @@
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
+
 def main_menu():
     markup = InlineKeyboardMarkup(row_width=2)
 
@@ -10,6 +11,19 @@ def main_menu():
 
     markup.row(
         InlineKeyboardButton("👩🏻‍🏫 مشاوره", callback_data="advisor")
+    )
+
+    return markup
+
+
+def admin_close_btn(user_id):
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "🔒 بستن تیکت",
+            callback_data=f"admin_close:{user_id}"
+        )
     )
 
     return markup
