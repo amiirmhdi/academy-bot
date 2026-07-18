@@ -385,16 +385,26 @@ def broadcast_message(message):
 
         try:
 
-            bot.copy_message(
-                chat_id=chat_id,
-                from_chat_id=message.chat.id,
-                message_id=message.message_id
-            )
+            if message.content_type == "text":
+
+                bot.send_message(
+                    chat_id,
+                    message.text
+                )
+
+            else:
+
+                bot.copy_message(
+                    chat_id=chat_id,
+                    from_chat_id=message.chat.id,
+                    message_id=message.message_id
+                )
 
             success += 1
 
-        except:
+        except Exception as e:
 
+            print(f"{chat_id} -> {e}")
             failed += 1
 
     bot.send_message(
