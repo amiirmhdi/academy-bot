@@ -6,6 +6,7 @@ DB_NAME = "arakbot.db"
 print("DB PATH:", os.path.abspath(DB_NAME))
 
 def init_db():
+
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
 
@@ -17,22 +18,9 @@ def init_db():
     )
     """)
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS tickets(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id INTEGER,
-        status TEXT
-    )
-    """)
+    cur.execute("SELECT COUNT(*) FROM users")
 
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS messages(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        ticket_id INTEGER,
-        sender TEXT,
-        text TEXT
-    )
-    """)
+    print("TOTAL USERS IN DB:", cur.fetchone()[0])
 
     conn.commit()
     conn.close()
