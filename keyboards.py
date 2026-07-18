@@ -6,17 +6,18 @@ def main_menu():
 
     markup.row(
         InlineKeyboardButton("📚 دوره‌ها", callback_data="courses"),
-        InlineKeyboardButton("⭐ نظر شما", callback_data="feedback")
+        InlineKeyboardButton("👩🏻‍🏫 مشاوره", callback_data="advisor")
     )
 
     markup.row(
-        InlineKeyboardButton("👩🏻‍🏫 مشاوره", callback_data="advisor")
+        InlineKeyboardButton("⭐ نظر شما", callback_data="feedback")
     )
 
     return markup
 
 
 def admin_close_btn(user_id):
+
     markup = InlineKeyboardMarkup()
 
     markup.add(
