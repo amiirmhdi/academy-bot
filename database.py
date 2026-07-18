@@ -35,6 +35,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def add_user(chat_id, first_name, username):
 
     conn = sqlite3.connect(DB_NAME)
@@ -43,10 +44,24 @@ def add_user(chat_id, first_name, username):
     cur.execute("""
     INSERT OR IGNORE INTO users(chat_id,first_name,username)
     VALUES(?,?,?)
-    """,(chat_id,first_name,username))
+    """, (chat_id, first_name, username))
 
     conn.commit()
     conn.close()
+
+
+def get_all_users():
+
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+
+    cur.execute("SELECT chat_id FROM users")
+
+    users = cur.fetchall()
+
+    conn.close()
+
+    return users
 
 
 def get_open_ticket(user_id):
@@ -57,9 +72,9 @@ def get_open_ticket(user_id):
     cur.execute("""
     SELECT id FROM tickets
     WHERE user_id=? AND status='open'
-    """,(user_id,))
+    """, (user_id,))
 
-    ticket=cur.fetchone()
+    ticket = cur.fetchone()
 
     conn.close()
 
@@ -68,21 +83,22 @@ def get_open_ticket(user_id):
 
 def create_ticket(user_id):
 
-    conn=sqlite3.connect(DB_NAME)
-    cur=conn.cursor()
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
 
     cur.execute("""
     INSERT INTO tickets(user_id,status)
     VALUES(?,?)
-    """,(user_id,"open"))
+    """, (user_id, "open"))
 
     conn.commit()
 
-    ticket_id=cur.lastrowid
+    ticket_id = cur.lastrowid
 
     conn.close()
 
     return ticket_id
+
 
 def close_ticket(user_id):
 
@@ -93,10 +109,11 @@ def close_ticket(user_id):
     UPDATE tickets
     SET status='closed'
     WHERE user_id=? AND status='open'
-    """,(user_id,))
+    """, (user_id,))
 
     conn.commit()
     conn.close()
+
 
 def save_message(ticket_id, sender, text):
 

@@ -5,9 +5,11 @@ from config import TOKEN, ADMIN_ID
 from database import (
     init_db,
     add_user,
+    get_all_users,
     get_open_ticket,
     create_ticket,
-    close_ticket
+    close_ticket,
+    save_message
 )
 
 bot = telebot.TeleBot(TOKEN)
@@ -86,6 +88,18 @@ def callback(call):
         bot.register_next_step_handler(
             msg,
             send_feedback
+        )
+
+    elif call.data == "broadcast":
+
+        msg = bot.send_message(
+            call.message.chat.id,
+            "📢 پیام همگانی را ارسال کنید."
+        )
+
+        bot.register_next_step_handler(
+            msg,
+            broadcast_message
         )
 
     elif call.data.startswith("admin_close:"):
@@ -356,6 +370,39 @@ def media_handler(message):
     send_to_admin(
         message,
         ticket[0]
+    )
+
+def broadcast_message(message):
+
+    users = get_all_users()
+
+    success = 0
+    failed = 0
+
+    for user in users:
+
+        chat_id = user[0]
+
+        try:
+
+            bot.copy_message(
+                chat_id=chat_id,
+                from_chat_id=message.chat.id,
+                message_id=message.message_id
+            )
+
+            success += 1
+
+        except:
+
+            failed += 1
+
+    bot.send_message(
+        ADMIN_ID,
+        f"""✅ ارسال همگانی پایان یافت.
+
+📤 موفق: {success}
+❌ ناموفق: {failed}"""
     )
 
     
