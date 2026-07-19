@@ -41,4 +41,11 @@ def admin_panel():
         )
     )
 
+    markup.add(
+        InlineKeyboardButton(
+            "👥 مدیریت کاربران",
+            callback_data="users_panel"
+        )
+    )
+
     return markup
