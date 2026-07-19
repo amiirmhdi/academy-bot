@@ -1,4 +1,6 @@
+import os
 import telebot
+from openpyxl import Workbook
 
 from keyboards import main_menu, admin_close_btn, admin_panel
 from config import TOKEN, ADMIN_ID
@@ -12,7 +14,8 @@ from database import (
     save_message,
     get_users_count,
     get_first_user,
-    get_last_user
+    get_last_user,
+    get_users_info
 )
 
 bot = telebot.TeleBot(TOKEN)
@@ -132,6 +135,10 @@ def callback(call):
 {last_username}
 """
         )
+
+    elif call.data == "download_users":
+
+        download_users_excel(call.message.chat.id)
 
     elif call.data.startswith("admin_close:"):
 
@@ -459,6 +466,43 @@ def broadcast_message(message):
 📤 موفق: {success}
 ❌ ناموفق: {failed}"""
     )
+
+
+def download_users_excel(chat_id):
+
+    users = get_users_info()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Users"
+
+    ws.append([
+        "Chat ID",
+        "First Name",
+        "Username"
+    ])
+
+    for user in users:
+
+        ws.append([
+            user[0],
+            user[1],
+            user[2]
+        ])
+
+    file_name = "users.xlsx"
+
+    wb.save(file_name)
+
+    with open(file_name, "rb") as file:
+
+        bot.send_document(
+            chat_id,
+            file,
+            caption=f"👥 تعداد کاربران: {len(users)}"
+        )
+
+    os.remove(file_name)
 
     
 print("Bot Started...")

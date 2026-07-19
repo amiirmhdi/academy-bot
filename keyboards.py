@@ -48,4 +48,11 @@ def admin_panel():
         )
     )
 
+    markup.add(
+        InlineKeyboardButton(
+            "📤 دانلود کاربران",
+            callback_data="download_users"
+        )
+    )
+
     return markup

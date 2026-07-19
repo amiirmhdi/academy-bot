@@ -209,3 +209,22 @@ def get_last_user():
     conn.close()
 
     return user
+
+
+def get_users_info():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT chat_id, first_name, username
+    FROM users
+    ORDER BY chat_id
+    """)
+
+    users = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return users
