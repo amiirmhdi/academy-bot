@@ -154,3 +154,58 @@ def save_message(ticket_id, sender, text):
 
     cur.close()
     conn.close()    
+
+
+def get_users_count():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT COUNT(*) FROM users")
+
+    count = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    return count
+
+
+def get_first_user():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT chat_id, first_name, username
+    FROM users
+    ORDER BY chat_id ASC
+    LIMIT 1
+    """)
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return user
+
+
+def get_last_user():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT chat_id, first_name, username
+    FROM users
+    ORDER BY chat_id DESC
+    LIMIT 1
+    """)
+
+    user = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return user

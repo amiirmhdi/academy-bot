@@ -2,8 +2,6 @@ import telebot
 
 from keyboards import main_menu, admin_close_btn, admin_panel
 from config import TOKEN, ADMIN_ID
-from config import DATABASE_URL
-print("DATABASE_URL =", DATABASE_URL)
 from database import (
     init_db,
     add_user,
@@ -11,7 +9,10 @@ from database import (
     get_open_ticket,
     create_ticket,
     close_ticket,
-    save_message
+    save_message,
+    get_users_count,
+    get_first_user,
+    get_last_user
 )
 
 bot = telebot.TeleBot(TOKEN)
@@ -102,6 +103,34 @@ def callback(call):
         bot.register_next_step_handler(
             msg,
             broadcast_message
+        )
+
+    elif call.data == "users_panel":
+
+        count = get_users_count()
+        first = get_first_user()
+        last = get_last_user()
+
+        first_name = first[1] if first else "-"
+        first_username = f"@{first[2]}" if first and first[2] else "ندارد"
+
+        last_name = last[1] if last else "-"
+        last_username = f"@{last[2]}" if last and last[2] else "ندارد"
+
+        bot.send_message(
+            call.message.chat.id,
+            f"""👥 مدیریت کاربران
+
+👤 تعداد کاربران: {count}
+
+🥇 اولین کاربر:
+{first_name}
+{first_username}
+
+🆕 آخرین کاربر:
+{last_name}
+{last_username}
+"""
         )
 
     elif call.data.startswith("admin_close:"):
