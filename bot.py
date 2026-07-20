@@ -4,6 +4,7 @@ from openpyxl import Workbook
 
 from keyboards import (
     main_menu,
+    back_to_main,
     admin_close_btn,
     admin_panel,
     rating_keyboard,
@@ -67,12 +68,31 @@ def callback(call):
 
     bot.answer_callback_query(call.id)
 
-    if call.data == "courses":
+    if call.data == "main_menu":
 
-        bot.send_message(
-            call.message.chat.id,
-            "📚 لیست دوره‌ها به زودی اضافه می‌شود."
+        bot.edit_message_text(
+            """🎓 آکادمی آرَک
+
+یکی از گزینه‌های زیر را انتخاب کنید.""",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=main_menu()
         )
+
+
+    elif call.data == "courses":
+
+        bot.edit_message_text(
+            """📚 دوره‌ها
+
+لیست دوره‌های آکادمی آرَک به زودی اضافه می‌شود.
+
+🌱 منتظر خبرهای خوب باشید.""",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=back_to_main()
+        )
+
 
     elif call.data == "advisor":
 
@@ -94,13 +114,18 @@ def callback(call):
             ticket_id
         )
 
+
     elif call.data == "feedback":
 
-        bot.send_message(
-            call.message.chat.id,
-            "⭐ ابتدا به آکادمی آرَک امتیاز بده.",
+        bot.edit_message_text(
+            """⭐ امتیاز و نظر
+
+لطفاً میزان رضایت خود از آکادمی آرَک را انتخاب کنید.""",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
             reply_markup=rating_keyboard()
         )
+
 
     elif call.data.startswith("rate_"):
 
@@ -120,6 +145,7 @@ def callback(call):
             message_id=call.message.message_id,
             reply_markup=rating_confirm_keyboard(rating)
         )
+
 
     elif call.data.startswith("confirm_rate_"):
 
@@ -149,24 +175,24 @@ def callback(call):
             send_feedback
         )
 
+
     elif call.data == "about_arc":
 
-        bot.send_message(
-            call.message.chat.id,
+        bot.edit_message_text(
             """🏛 آکادمی آرَک
 
-به آکادمی آرَک خوش اومدی. 🌱
+«آرَک» در فارسی کهن به معنای «آسمان بلند» و «بالا» آمده و در برخی متون قدیمی مفاهیمی مانند «افتخار» و «شکوه» را تداعی می‌کند.
 
-«آرَک» در فارسی کهن به معنای «آسمان بلند» و «بالا» آمده و در برخی متون قدیمی نیز مفاهیمی مانند «افتخار» و «شکوه» را تداعی می‌کند.
+ما باور داریم یادگیری یعنی حرکت به سمت جایگاهی بالاتر؛ مسیری برای رشد، پیشرفت و ساختن آینده‌ای بهتر.
 
-ما این نام را انتخاب کردیم، چون باور داریم یادگیری یعنی هر روز قدمی به سمت جایگاهی بالاتر؛ مسیری برای رشد، پیشرفت و ساختن آینده‌ای بهتر.
+آکادمی آرَک تازه ابتدای این مسیر است. هدف ما فقط محدود به تلگرام نیست و در آینده با توسعه امکانات، دوره‌ها و پلتفرم اختصاصی، محیطی کامل‌تر برای یادگیری ایجاد خواهیم کرد.
 
-آکادمی آرَک تازه ابتدای این مسیر است. امروز از طریق این ربات کنار شما هستیم، اما هدف ما به تلگرام محدود نمی‌شود.
-
-در آینده با توسعه آکادمی، دوره‌های بیشتر، امکانات جدید و پلتفرم اختصاصی، تلاش می‌کنیم محیطی کامل برای یادگیری و رشد فراهم کنیم.
-
-از اینکه از اولین همراهان آکادمی آرَک هستی، خوشحالیم و امیدواریم این مسیر را با هم ادامه بدهیم. ❤️"""
+از اینکه همراه ما هستی خوشحالیم. ❤️""",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=back_to_main()
         )
+
 
     elif call.data == "broadcast":
 
@@ -180,17 +206,12 @@ def callback(call):
             broadcast_message
         )
 
+
     elif call.data == "users_panel":
 
         count = get_users_count()
         first = get_first_user()
         last = get_last_user()
-
-        first_name = first[1] if first else "-"
-        first_username = f"@{first[2]}" if first and first[2] else "ندارد"
-
-        last_name = last[1] if last else "-"
-        last_username = f"@{last[2]}" if last and last[2] else "ندارد"
 
         bot.send_message(
             call.message.chat.id,
@@ -199,18 +220,13 @@ def callback(call):
 👤 تعداد کاربران: {count}
 
 🥇 اولین کاربر:
-{first_name}
-{first_username}
+{first}
 
 🆕 آخرین کاربر:
-{last_name}
-{last_username}
+{last}
 """
         )
 
-    elif call.data == "download_users":
-
-        download_users_excel(call.message.chat.id)
 
     elif call.data.startswith("admin_close:"):
 
@@ -226,12 +242,7 @@ def callback(call):
 
         bot.send_message(
             user_id,
-            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 💬 حرف بزنیم بزنید."
-        )
-
-        bot.answer_callback_query(
-            call.id,
-            "✅ تیکت بسته شد."
+            "✅ گفتگوی شما بسته شد."
         )   
 
 def send_to_admin(message, ticket_id):
