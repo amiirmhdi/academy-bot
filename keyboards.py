@@ -76,3 +76,32 @@ def admin_panel():
     )
 
     return markup
+
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+
+def rating_keyboard():
+
+    markup = InlineKeyboardMarkup(row_width=1)
+
+    markup.add(
+        InlineKeyboardButton("⭐", callback_data="rate_1")
+    )
+
+    markup.add(
+        InlineKeyboardButton("⭐⭐", callback_data="rate_2")
+    )
+
+    markup.add(
+        InlineKeyboardButton("⭐⭐⭐", callback_data="rate_3")
+    )
+
+    markup.add(
+        InlineKeyboardButton("⭐⭐⭐⭐", callback_data="rate_4")
+    )
+
+    markup.add(
+        InlineKeyboardButton("⭐⭐⭐⭐⭐", callback_data="rate_5")
+    )
+
+    return markup

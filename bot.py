@@ -2,7 +2,12 @@ import os
 import telebot
 from openpyxl import Workbook
 
-from keyboards import main_menu, admin_close_btn, admin_panel
+from keyboards import (
+    main_menu,
+    admin_close_btn,
+    admin_panel,
+    rating_keyboard
+)
 from config import TOKEN, ADMIN_ID
 from database import (
     init_db,
@@ -15,7 +20,11 @@ from database import (
     get_users_count,
     get_first_user,
     get_last_user,
-    get_users_info
+    get_users_info,
+    save_rating,
+    save_review,
+    get_rating_stats,
+    get_connection
 )
 
 bot = telebot.TeleBot(TOKEN)
@@ -86,9 +95,31 @@ def callback(call):
 
     elif call.data == "feedback":
 
+        bot.send_message(
+            call.message.chat.id,
+            "⭐ ابتدا به آکادمی آرَک امتیاز بده.",
+            reply_markup=rating_keyboard()
+        )
+
+    elif call.data.startswith("rate_"):
+
+        rating = int(call.data.split("_")[1])
+
+        save_rating(
+            call.from_user.id,
+            call.from_user.first_name,
+            call.from_user.username,
+            rating
+        )
+
         msg = bot.send_message(
             call.message.chat.id,
-            "⭐ لطفاً امتیاز و نظر خود را بنویسید."
+            """🌱 ممنون از امتیازت ❤️
+
+اگر دوست داشتی،
+نظرت رو هم برامون بنویس.
+
+(نوشتن نظر اختیاریه.)"""
         )
 
         bot.register_next_step_handler(
@@ -336,31 +367,67 @@ def user_chat(message):
 
 def send_feedback(message):
 
+    save_review(
+        message.chat.id,
+        message.text
+    )
+
+    count, avg = get_rating_stats()
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT rating
+    FROM ratings
+    WHERE chat_id=%s
+    """, (message.chat.id,))
+
+    rating = cur.fetchone()[0]
+
+    cur.close()
+    conn.close()
+
+    stars = "⭐" * rating
+
     username = (
-        "@" + message.from_user.username
+        f"@{message.from_user.username}"
         if message.from_user.username
         else "ندارد"
     )
 
-    text = f'''⭐ نظر جدید
-
-"{message.from_user.first_name}"
-{username}
-
-💬
-{message.text}'''
-
-    info = bot.send_message(
+    bot.send_message(
         ADMIN_ID,
-        text
-    )
+        f"""🌟 بازخورد جدید دریافت شد
 
-    feedback_reply_map[info.message_id] = message.chat.id
+👤 {message.from_user.first_name}
+
+🆔 {message.chat.id}
+
+📛 {username}
+
+⭐ امتیاز:
+{stars} ({rating} از 5)
+
+📊 میانگین امتیاز:
+{round(avg,2)} ⭐
+
+🗳 تعداد کل رأی‌ها:
+{count}
+
+💬 نظر:
+
+{message.text}"""
+    )
 
     bot.send_message(
         message.chat.id,
-        "❤️ ممنون، نظر شما ثبت شد."
+        """❤️ ممنون بابت امتیاز و نظرت.
+
+بازخورد شما برای بهتر شدن آکادمی آرَک
+خیلی ارزشمنده. 🌱"""
     )
+    
 @bot.message_handler(
     func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
     content_types=[

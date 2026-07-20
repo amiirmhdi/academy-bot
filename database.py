@@ -39,6 +39,16 @@ def init_db():
     );
     """)
 
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS ratings(
+        chat_id BIGINT PRIMARY KEY,
+        first_name TEXT,
+        username TEXT,
+        rating INTEGER,
+        review TEXT DEFAULT ''
+    );
+    """)
+
     conn.commit()
 
     cur.close()
@@ -228,3 +238,61 @@ def get_users_info():
     conn.close()
 
     return users
+
+
+def save_rating(chat_id, first_name, username, rating):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    INSERT INTO ratings(chat_id, first_name, username, rating)
+    VALUES(%s,%s,%s,%s)
+    ON CONFLICT(chat_id)
+    DO UPDATE SET
+    first_name=EXCLUDED.first_name,
+    username=EXCLUDED.username,
+    rating=EXCLUDED.rating;
+    """, (chat_id, first_name, username, rating))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+
+def save_review(chat_id, review):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    UPDATE ratings
+    SET review=%s
+    WHERE chat_id=%s
+    """, (review, chat_id))
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
+
+
+def get_rating_stats():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+    SELECT
+        COUNT(*),
+        COALESCE(AVG(rating),0)
+    FROM ratings
+    """)
+
+    result = cur.fetchone()
+
+    cur.close()
+    conn.close()
+
+    return result
