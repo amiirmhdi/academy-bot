@@ -97,40 +97,40 @@ def callback(call):
 
     elif call.data == "advisor":
 
-    ticket = get_open_ticket(call.message.chat.id)
+        ticket = get_open_ticket(call.message.chat.id)
 
-    if ticket:
-        ticket_id = ticket[0]
-    else:
-        ticket_id = create_ticket(call.message.chat.id)
+        if ticket:
+            ticket_id = ticket[0]
+        else:
+            ticket_id = create_ticket(call.message.chat.id)
 
-    bot.edit_message_text(
-        """💬 حرف بزنیم
+        bot.edit_message_text(
+            """💬 حرف بزنیم
 
 پیام خود را برای مشاور ارسال کنید.
 
 در اولین فرصت پاسخ شما داده خواهد شد.""",
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        reply_markup=back_to_main()
-    )
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=back_to_main()
+        )
 
-    msg = bot.send_message(
-        call.message.chat.id,
-        "✍️ پیام خود را ارسال کنید:"
-    )
+        msg = bot.send_message(
+            call.message.chat.id,
+            "✍️ پیام خود را ارسال کنید:"
+        )
 
-    bot.register_next_step_handler(
-        msg,
-        send_to_admin,
-        ticket_id
-    )
+        bot.register_next_step_handler(
+            msg,
+            send_to_admin,
+            ticket_id
+        )
 
 
     elif call.data == "feedback":
 
         bot.edit_message_text(
-            """⭐ امتیاز و نظر
+            """⭐️ امتیاز و نظر
 
 لطفاً میزان رضایت خود از آکادمی آرَک را انتخاب کنید.""",
             chat_id=call.message.chat.id,
@@ -143,10 +143,10 @@ def callback(call):
 
         rating = int(call.data.split("_")[1])
 
-        stars = "⭐" * rating
+        stars = "⭐️" * rating
 
         bot.edit_message_text(
-            f"""⭐ شما به آکادمی آرَک
+            f"""⭐️ شما به آکادمی آرَک
 
 {stars}
 
@@ -262,7 +262,7 @@ def callback(call):
 
     bot.answer_callback_query(
         call.id,
-        "✅ تیکت بسته شد."
+        "✅ گفتگوی شما بسته شد."
     )   
 
 def send_to_admin(message, ticket_id):
