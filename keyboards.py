@@ -149,3 +149,16 @@ def admin_panel():
     )
 
     return markup
+
+def closed_ticket_keyboard():
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 بازگشت به منوی اصلی",
+            callback_data="main_menu"
+        )
+    )
+
+    return markup
