@@ -96,23 +96,32 @@ def callback(call):
 
     elif call.data == "advisor":
 
-        ticket = get_open_ticket(call.message.chat.id)
+    ticket = get_open_ticket(call.message.chat.id)
 
-        if ticket:
-            ticket_id = ticket[0]
-        else:
-            ticket_id = create_ticket(call.message.chat.id)
+    if ticket:
+        ticket_id = ticket[0]
+    else:
+        ticket_id = create_ticket(call.message.chat.id)
 
-        msg = bot.send_message(
-            call.message.chat.id,
-            "💬 پیام خود را بنویسید."
-        )
+    bot.edit_message_text(
+        """💬 پیام خود را بنویسید.
 
-        bot.register_next_step_handler(
-            msg,
-            send_to_admin,
-            ticket_id
-        )
+پس از ارسال پیام، مشاور در اولین فرصت پاسخ شما را خواهد داد.""",
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=back_to_main()
+    )
+
+    msg = bot.send_message(
+        call.message.chat.id,
+        "✍️ پیام خود را ارسال کنید:"
+    )
+
+    bot.register_next_step_handler(
+        msg,
+        send_to_admin,
+        ticket_id
+    )
 
 
     elif call.data == "feedback":
@@ -230,20 +239,28 @@ def callback(call):
 
     elif call.data.startswith("admin_close:"):
 
-        user_id = int(call.data.split(":")[1])
+    user_id = int(call.data.split(":")[1])
 
-        close_ticket(user_id)
+    close_ticket(user_id)
 
-        bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None
-        )
+    bot.edit_message_reply_markup(
+        chat_id=call.message.chat.id,
+        message_id=call.message.message_id,
+        reply_markup=None
+    )
 
-        bot.send_message(
-            user_id,
-            "✅ گفتگوی شما بسته شد."
-        )   
+    bot.send_message(
+        user_id,
+        """✅ گفتگوی شما با موفقیت بسته شد.
+
+اگر دوباره سؤال یا مشکلی داشتید، خوشحال می‌شویم کمکتان کنیم. 🌱""",
+        reply_markup=closed_ticket_keyboard()
+    )
+
+    bot.answer_callback_query(
+        call.id,
+        "✅ تیکت بسته شد."
+    )   
 
 def send_to_admin(message, ticket_id):
 
@@ -352,7 +369,8 @@ def admin_reply(message):
 
         bot.send_message(
             user_id,
-            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
+            "✅ گفتگوی شما با موفقیت بسته شد.\n\nهر زمان دوباره نیاز به راهنمایی داشتید خوشحال می‌شویم کمکتان کنیم. 🌱",
+            reply_markup=closed_ticket_keyboard()
         )
 
         bot.reply_to(

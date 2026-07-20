@@ -21,7 +21,7 @@ def main_menu():
 
     markup.add(
         InlineKeyboardButton(
-            "⭐ امتیاز و نظر",
+            "⭐️ امتیاز و نظر",
             callback_data="feedback"
         )
     )
@@ -38,11 +38,25 @@ def main_menu():
 
 def back_to_main():
 
-    markup = InlineKeyboardMarkup()
+    markup = InlineKeyboardMarkup(row_width=1)
 
     markup.add(
         InlineKeyboardButton(
             "🏠 منوی اصلی",
+            callback_data="main_menu"
+        )
+    )
+
+    return markup
+
+
+def closed_ticket_keyboard():
+
+    markup = InlineKeyboardMarkup(row_width=1)
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 بازگشت به منوی اصلی",
             callback_data="main_menu"
         )
     )
@@ -55,23 +69,23 @@ def rating_keyboard():
     markup = InlineKeyboardMarkup(row_width=1)
 
     markup.add(
-        InlineKeyboardButton("⭐", callback_data="rate_1")
+        InlineKeyboardButton("⭐️", callback_data="rate_1")
     )
 
     markup.add(
-        InlineKeyboardButton("⭐⭐", callback_data="rate_2")
+        InlineKeyboardButton("⭐️⭐️", callback_data="rate_2")
     )
 
     markup.add(
-        InlineKeyboardButton("⭐⭐⭐", callback_data="rate_3")
+        InlineKeyboardButton("⭐️⭐️⭐️", callback_data="rate_3")
     )
 
     markup.add(
-        InlineKeyboardButton("⭐⭐⭐⭐", callback_data="rate_4")
+        InlineKeyboardButton("⭐️⭐️⭐️⭐️", callback_data="rate_4")
     )
 
     markup.add(
-        InlineKeyboardButton("⭐⭐⭐⭐⭐", callback_data="rate_5")
+        InlineKeyboardButton("⭐️⭐️⭐️⭐️⭐️", callback_data="rate_5")
     )
 
     markup.add(
