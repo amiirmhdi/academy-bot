@@ -6,7 +6,8 @@ from keyboards import (
     main_menu,
     admin_close_btn,
     admin_panel,
-    rating_keyboard
+    rating_keyboard,
+    rating_confirm_keyboard
 )
 from config import TOKEN, ADMIN_ID
 from database import (
@@ -105,6 +106,25 @@ def callback(call):
 
         rating = int(call.data.split("_")[1])
 
+        stars = "⭐" * rating
+
+        bot.edit_message_text(
+            f"""⭐ شما به آکادمی آرَک
+
+{stars}
+
+امتیاز دادید.
+
+آیا از انتخاب خود مطمئن هستید؟""",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=rating_confirm_keyboard(rating)
+        )
+
+    elif call.data.startswith("confirm_rate_"):
+
+        rating = int(call.data.split("_")[2])
+
         save_rating(
             call.from_user.id,
             call.from_user.first_name,
@@ -114,12 +134,14 @@ def callback(call):
 
         msg = bot.send_message(
             call.message.chat.id,
-            """🌱 ممنون از امتیازت ❤️
+            """❤️ از اینکه برای بهتر شدن آکادمی آرَک وقت گذاشتی، ممنونیم.
 
 اگر دوست داشتی،
-نظرت رو هم برامون بنویس.
+نظر یا پیشنهادت رو هم برامون بنویس.
 
-(نوشتن نظر اختیاریه.)"""
+🌱 نظرات شما کمک می‌کنه هر روز بهتر از قبل باشیم.
+
+(نوشتن نظر کاملاً اختیاری است.)"""
         )
 
         bot.register_next_step_handler(

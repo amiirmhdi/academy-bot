@@ -105,3 +105,22 @@ def rating_keyboard():
     )
 
     return markup
+
+def rating_confirm_keyboard(rating):
+
+    from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+    markup = InlineKeyboardMarkup(row_width=2)
+
+    markup.add(
+        InlineKeyboardButton(
+            "✅ تأیید امتیاز",
+            callback_data=f"confirm_rate_{rating}"
+        ),
+        InlineKeyboardButton(
+            "🔄 انتخاب دوباره",
+            callback_data="feedback"
+        )
+    )
+
+    return markup
