@@ -242,28 +242,27 @@ def callback(call):
 
     elif call.data.startswith("admin_close:"):
 
-    user_id = int(call.data.split(":")[1])
+        user_id = int(call.data.split(":")[1])
 
-    close_ticket(user_id)
+        close_ticket(user_id)
 
-    bot.edit_message_reply_markup(
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        reply_markup=None
-    )
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
 
-    bot.send_message(
-        user_id,
-        """✅ گفتگوی شما با موفقیت بسته شد.
+        bot.send_message(
+            user_id,
+            """✅ گفتگوی شما توسط مشاور بسته شد.
 
-اگر دوباره سؤال یا مشکلی داشتید، از طریق دکمه زیر دوباره با ما در ارتباط باشید. 🌱""",
-        reply_markup=closed_ticket_keyboard()
-    )
+اگر دوباره سؤال یا مشکلی داشتید، از طریق منوی اصلی با ما در ارتباط باشید. 🌱"""
+        )
 
-    bot.answer_callback_query(
-        call.id,
-        "✅ گفتگوی شما بسته شد."
-    )   
+        bot.answer_callback_query(
+            call.id,
+            "✅ گفتگوی شما بسته شد."
+        )   
 
 def send_to_admin(message, ticket_id):
 
