@@ -124,3 +124,16 @@ def rating_confirm_keyboard(rating):
     )
 
     return markup
+
+def cancel_chat_keyboard():
+
+    markup = InlineKeyboardMarkup()
+
+    markup.add(
+        InlineKeyboardButton(
+            "🏠 منوی اصلی",
+            callback_data="main_menu"
+        )
+    )
+
+    return markup
