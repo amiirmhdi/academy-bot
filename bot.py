@@ -4,7 +4,6 @@ from openpyxl import Workbook
 
 from keyboards import (
     main_menu,
-    back_to_main,
     admin_close_btn,
     admin_panel,
     rating_keyboard,
@@ -68,73 +67,40 @@ def callback(call):
 
     bot.answer_callback_query(call.id)
 
-    if call.data == "main_menu":
+    if call.data == "courses":
 
-        bot.edit_message_text(
-            """🎓 آکادمی آرَک
-
-یکی از گزینه‌های زیر را انتخاب کنید.""",
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=main_menu()
+        bot.send_message(
+            call.message.chat.id,
+            "📚 لیست دوره‌ها به زودی اضافه می‌شود."
         )
-
-
-    elif call.data == "courses":
-
-        bot.edit_message_text(
-            """📚 دوره‌ها
-
-لیست دوره‌های آکادمی آرَک به زودی اضافه می‌شود.
-
-🌱 منتظر خبرهای خوب باشید.""",
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=back_to_main()
-        )
-
 
     elif call.data == "advisor":
 
-    ticket = get_open_ticket(call.message.chat.id)
+        ticket = get_open_ticket(call.message.chat.id)
 
-    if ticket:
-        ticket_id = ticket[0]
-    else:
-        ticket_id = create_ticket(call.message.chat.id)
+        if ticket:
+            ticket_id = ticket[0]
+        else:
+            ticket_id = create_ticket(call.message.chat.id)
 
-    bot.edit_message_text(
-        """💬 پیام خود را بنویسید.
+        msg = bot.send_message(
+            call.message.chat.id,
+            "💬 پیام خود را بنویسید."
+        )
 
-پس از ارسال پیام، مشاور در اولین فرصت پاسخ شما را خواهد داد.""",
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        reply_markup=back_to_main()
-    )
-
-    msg = bot.send_message(
-        call.message.chat.id,
-        "✍️ پیام خود را ارسال کنید:"
-    )
-
-    bot.register_next_step_handler(
-        msg,
-        send_to_admin,
-        ticket_id
-    )
-
+        bot.register_next_step_handler(
+            msg,
+            send_to_admin,
+            ticket_id
+        )
 
     elif call.data == "feedback":
 
-        bot.edit_message_text(
-            """⭐ امتیاز و نظر
-
-لطفاً میزان رضایت خود از آکادمی آرَک را انتخاب کنید.""",
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
+        bot.send_message(
+            call.message.chat.id,
+            "⭐ ابتدا به آکادمی آرَک امتیاز بده.",
             reply_markup=rating_keyboard()
         )
-
 
     elif call.data.startswith("rate_"):
 
@@ -154,7 +120,6 @@ def callback(call):
             message_id=call.message.message_id,
             reply_markup=rating_confirm_keyboard(rating)
         )
-
 
     elif call.data.startswith("confirm_rate_"):
 
@@ -184,24 +149,24 @@ def callback(call):
             send_feedback
         )
 
-
     elif call.data == "about_arc":
 
-        bot.edit_message_text(
+        bot.send_message(
+            call.message.chat.id,
             """🏛 آکادمی آرَک
 
-«آرَک» در فارسی کهن به معنای «آسمان بلند» و «بالا» آمده و در برخی متون قدیمی مفاهیمی مانند «افتخار» و «شکوه» را تداعی می‌کند.
+به آکادمی آرَک خوش اومدی. 🌱
 
-ما باور داریم یادگیری یعنی حرکت به سمت جایگاهی بالاتر؛ مسیری برای رشد، پیشرفت و ساختن آینده‌ای بهتر.
+«آرَک» در فارسی کهن به معنای «آسمان بلند» و «بالا» آمده و در برخی متون قدیمی نیز مفاهیمی مانند «افتخار» و «شکوه» را تداعی می‌کند.
 
-آکادمی آرَک تازه ابتدای این مسیر است. هدف ما فقط محدود به تلگرام نیست و در آینده با توسعه امکانات، دوره‌ها و پلتفرم اختصاصی، محیطی کامل‌تر برای یادگیری ایجاد خواهیم کرد.
+ما این نام را انتخاب کردیم، چون باور داریم یادگیری یعنی هر روز قدمی به سمت جایگاهی بالاتر؛ مسیری برای رشد، پیشرفت و ساختن آینده‌ای بهتر.
 
-از اینکه همراه ما هستی خوشحالیم. ❤️""",
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=back_to_main()
+آکادمی آرَک تازه ابتدای این مسیر است. امروز از طریق این ربات کنار شما هستیم، اما هدف ما به تلگرام محدود نمی‌شود.
+
+در آینده با توسعه آکادمی، دوره‌های بیشتر، امکانات جدید و پلتفرم اختصاصی، تلاش می‌کنیم محیطی کامل برای یادگیری و رشد فراهم کنیم.
+
+از اینکه از اولین همراهان آکادمی آرَک هستی، خوشحالیم و امیدواریم این مسیر را با هم ادامه بدهیم. ❤️"""
         )
-
 
     elif call.data == "broadcast":
 
@@ -215,12 +180,17 @@ def callback(call):
             broadcast_message
         )
 
-
     elif call.data == "users_panel":
 
         count = get_users_count()
         first = get_first_user()
         last = get_last_user()
+
+        first_name = first[1] if first else "-"
+        first_username = f"@{first[2]}" if first and first[2] else "ندارد"
+
+        last_name = last[1] if last else "-"
+        last_username = f"@{last[2]}" if last and last[2] else "ندارد"
 
         bot.send_message(
             call.message.chat.id,
@@ -229,38 +199,40 @@ def callback(call):
 👤 تعداد کاربران: {count}
 
 🥇 اولین کاربر:
-{first}
+{first_name}
+{first_username}
 
 🆕 آخرین کاربر:
-{last}
+{last_name}
+{last_username}
 """
         )
 
+    elif call.data == "download_users":
+
+        download_users_excel(call.message.chat.id)
 
     elif call.data.startswith("admin_close:"):
 
-    user_id = int(call.data.split(":")[1])
+        user_id = int(call.data.split(":")[1])
 
-    close_ticket(user_id)
+        close_ticket(user_id)
 
-    bot.edit_message_reply_markup(
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        reply_markup=None
-    )
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
 
-    bot.send_message(
-        user_id,
-        """✅ گفتگوی شما با موفقیت بسته شد.
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 💬 حرف بزنیم بزنید."
+        )
 
-اگر دوباره سؤال یا مشکلی داشتید، خوشحال می‌شویم کمکتان کنیم. 🌱""",
-        reply_markup=closed_ticket_keyboard()
-    )
-
-    bot.answer_callback_query(
-        call.id,
-        "✅ تیکت بسته شد."
-    )   
+        bot.answer_callback_query(
+            call.id,
+            "✅ تیکت بسته شد."
+        )   
 
 def send_to_admin(message, ticket_id):
 
@@ -369,8 +341,7 @@ def admin_reply(message):
 
         bot.send_message(
             user_id,
-            "✅ گفتگوی شما با موفقیت بسته شد.\n\nهر زمان دوباره نیاز به راهنمایی داشتید خوشحال می‌شویم کمکتان کنیم. 🌱",
-            reply_markup=closed_ticket_keyboard()
+            "✅ گفتگوی شما بسته شد.\n\nبرای شروع مجدد روی 👩🏻‍🏫 مشاوره بزنید."
         )
 
         bot.reply_to(
