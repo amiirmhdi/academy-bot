@@ -4,8 +4,6 @@ from openpyxl import Workbook
 
 from keyboards import (
     main_menu,
-    back_to_main,
-    closed_ticket_keyboard,
     admin_close_btn,
     admin_panel,
     rating_keyboard,
@@ -85,27 +83,16 @@ def callback(call):
         else:
             ticket_id = create_ticket(call.message.chat.id)
 
-        bot.edit_message_text(
-    """💬 حرف بزنیم
+        msg = bot.send_message(
+            call.message.chat.id,
+            "💬 پیام خود را بنویسید."
+        )
 
-پیام خود را برای مشاور ارسال کنید.
-
-در اولین فرصت پاسخ شما داده خواهد شد.""",
-    chat_id=call.message.chat.id,
-    message_id=call.message.message_id,
-    reply_markup=back_to_main()
-)
-
-msg = bot.send_message(
-    call.message.chat.id,
-    "✍️ پیام خود را ارسال کنید:"
-)
-
-bot.register_next_step_handler(
-    msg,
-    send_to_admin,
-    ticket_id
-)
+        bot.register_next_step_handler(
+            msg,
+            send_to_admin,
+            ticket_id
+        )
 
     elif call.data == "feedback":
 
@@ -227,28 +214,25 @@ bot.register_next_step_handler(
 
     elif call.data.startswith("admin_close:"):
 
-    user_id = int(call.data.split(":")[1])
+        user_id = int(call.data.split(":")[1])
 
-    close_ticket(user_id)
+        close_ticket(user_id)
 
-    bot.edit_message_reply_markup(
-        chat_id=call.message.chat.id,
-        message_id=call.message.message_id,
-        reply_markup=None
-    )
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
 
-    bot.send_message(
-        user_id,
-        """✅ گفتگوی شما با موفقیت بسته شد.
+        bot.send_message(
+            user_id,
+            "✅ گفتگوی شما توسط مشاور بسته شد.\n\nبرای شروع مجدد روی 💬 حرف بزنیم بزنید."
+        )
 
-اگر دوباره سؤال یا مشکلی داشتید، خوشحال می‌شویم کمکتان کنیم. 🌱""",
-        reply_markup=closed_ticket_keyboard()
-    )
-
-    bot.answer_callback_query(
-        call.id,
-        "✅ گفتگوی شما بسته شد."
-    )   
+        bot.answer_callback_query(
+            call.id,
+            "✅ تیکت بسته شد."
+        )   
 
 def send_to_admin(message, ticket_id):
 
