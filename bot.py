@@ -76,28 +76,23 @@ def callback(call):
 
     elif call.data == "advisor":
 
-    ticket = get_open_ticket(call.message.chat.id)
+        ticket = get_open_ticket(call.message.chat.id)
 
-    if ticket:
-        ticket_id = ticket[0]
-    else:
-        ticket_id = create_ticket(call.message.chat.id)
+        if ticket:
+            ticket_id = ticket[0]
+        else:
+            ticket_id = create_ticket(call.message.chat.id)
 
-    msg = bot.send_message(
-        call.message.chat.id,
-        """💬 پیام خود را بنویسید.
+        msg = bot.send_message(
+            call.message.chat.id,
+            "💬 پیام خود را بنویسید."
+        )
 
-مشاوران آکادمی آرَک در اولین فرصت پاسخ خواهند داد.
-
-اگر منصرف شدید، از دکمه زیر استفاده کنید.""",
-        reply_markup=cancel_chat_keyboard()
-    )
-
-    bot.register_next_step_handler(
-        msg,
-        send_to_admin,
-        ticket_id
-    )
+        bot.register_next_step_handler(
+            msg,
+            send_to_admin,
+            ticket_id
+        )
 
     elif call.data == "feedback":
 
@@ -216,14 +211,6 @@ def callback(call):
     elif call.data == "download_users":
 
         download_users_excel(call.message.chat.id)
-
-    elif call.data == "main_menu":
-
-    bot.send_message(
-        call.message.chat.id,
-        "🏛 آکادمی آرَک\n\nیکی از گزینه‌ها را انتخاب کنید.",
-        reply_markup=main_menu()
-    ) 
 
     elif call.data.startswith("admin_close:"):
 
