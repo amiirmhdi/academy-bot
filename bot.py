@@ -71,6 +71,8 @@ def callback(call):
 
     if call.data == "main_menu":
 
+        close_ticket(call.message.chat.id)
+
         bot.edit_message_text(
             """🎓 آکادمی آرَک
 
@@ -79,6 +81,8 @@ def callback(call):
             message_id=call.message.message_id,
             reply_markup=main_menu()
         )
+
+        return
 
 
     elif call.data == "courses":
@@ -256,7 +260,8 @@ def callback(call):
             user_id,
             """✅ گفتگوی شما توسط مشاور بسته شد.
 
-اگر دوباره سؤال یا مشکلی داشتید، از طریق منوی اصلی با ما در ارتباط باشید. 🌱"""
+اگر دوباره نیاز به مشاوره داشتید، از دکمه زیر استفاده کنید.""",
+            reply_markup=closed_ticket_keyboard()
         )
 
         bot.answer_callback_query(
