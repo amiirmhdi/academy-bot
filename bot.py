@@ -36,6 +36,8 @@ reply_map = {}
 
 feedback_reply_map = {}
 
+user_state = {}
+
 init_db()
 
 
@@ -73,6 +75,9 @@ def callback(call):
 
         close_ticket(call.message.chat.id)
 
+        user_state.pop(call.message.chat.id, None)
+        reply_map.pop(call.message.chat.id, None)
+
         bot.edit_message_text(
             """🎓 آکادمی آرَک
 
@@ -83,7 +88,6 @@ def callback(call):
         )
 
         return
-
 
     elif call.data == "courses":
 
@@ -98,7 +102,6 @@ def callback(call):
             reply_markup=back_to_main()
         )
 
-
     elif call.data == "advisor":
 
         ticket = get_open_ticket(call.message.chat.id)
@@ -108,33 +111,24 @@ def callback(call):
         else:
             ticket_id = create_ticket(call.message.chat.id)
 
-        bot.edit_message_text(
-            """💬 حرف بزنیم
+        reply_map[call.message.chat.id] = ticket_id
+        user_state[call.message.chat.id] = "advisor"
 
-پیام خود را برای مشاور ارسال کنید.
-
-در اولین فرصت پاسخ شما داده خواهد شد.""",
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=back_to_main()
-        )
-
-        msg = bot.send_message(
+        bot.send_message(
             call.message.chat.id,
-            "✍️ پیام خود را ارسال کنید:"
+            """💬 پیام خود را بنویسید.
+
+مشاوران آکادمی آرَک در اولین فرصت پاسخ خواهند داد.
+
+اگر منصرف شدید از دکمه زیر استفاده کنید.""",
+            reply_markup=cancel_chat_keyboard()
         )
 
-        bot.register_next_step_handler(
-            msg,
-            send_to_admin,
-            ticket_id
-        )
 
-
-    elif call.data == "feedback":
+        elif call.data == "feedback":
 
         bot.edit_message_text(
-            """⭐️ امتیاز و نظر
+            """⭐ امتیاز و نظر
 
 لطفاً میزان رضایت خود از آکادمی آرَک را انتخاب کنید.""",
             chat_id=call.message.chat.id,
@@ -142,15 +136,14 @@ def callback(call):
             reply_markup=rating_keyboard()
         )
 
-
     elif call.data.startswith("rate_"):
 
         rating = int(call.data.split("_")[1])
 
-        stars = "⭐️" * rating
+        stars = "⭐" * rating
 
         bot.edit_message_text(
-            f"""⭐️ شما به آکادمی آرَک
+            f"""شما به آکادمی آرَک
 
 {stars}
 
@@ -161,7 +154,6 @@ def callback(call):
             message_id=call.message.message_id,
             reply_markup=rating_confirm_keyboard(rating)
         )
-
 
     elif call.data.startswith("confirm_rate_"):
 
@@ -176,21 +168,21 @@ def callback(call):
 
         msg = bot.send_message(
             call.message.chat.id,
-            """❤️ از اینکه برای بهتر شدن آکادمی آرَک وقت گذاشتی، ممنونیم.
+            """🌱 ممنون از امتیازت ❤️
 
 اگر دوست داشتی،
 نظر یا پیشنهادت رو هم برامون بنویس.
 
-🌱 نظرات شما کمک می‌کنه هر روز بهتر از قبل باشیم.
-
-(نوشتن نظر کاملاً اختیاری است.)"""
+(نوشتن نظر اختیاری است.)""",
+            reply_markup=cancel_chat_keyboard()
         )
+
+        user_state[call.message.chat.id] = "feedback"
 
         bot.register_next_step_handler(
             msg,
             send_feedback
         )
-
 
     elif call.data == "about_arc":
 
@@ -222,12 +214,17 @@ def callback(call):
             broadcast_message
         )
 
-
     elif call.data == "users_panel":
 
         count = get_users_count()
         first = get_first_user()
         last = get_last_user()
+
+        first_name = first[1] if first else "-"
+        first_username = f"@{first[2]}" if first and first[2] else "ندارد"
+
+        last_name = last[1] if last else "-"
+        last_username = f"@{last[2]}" if last and last[2] else "ندارد"
 
         bot.send_message(
             call.message.chat.id,
@@ -236,19 +233,27 @@ def callback(call):
 👤 تعداد کاربران: {count}
 
 🥇 اولین کاربر:
-{first}
+{first_name}
+{first_username}
 
 🆕 آخرین کاربر:
-{last}
+{last_name}
+{last_username}
 """
         )
 
+    elif call.data == "download_users":
+
+        download_users_excel(call.message.chat.id)
 
     elif call.data.startswith("admin_close:"):
 
         user_id = int(call.data.split(":")[1])
 
         close_ticket(user_id)
+
+        user_state.pop(user_id, None)
+        reply_map.pop(user_id, None)
 
         bot.edit_message_reply_markup(
             chat_id=call.message.chat.id,
@@ -260,8 +265,8 @@ def callback(call):
             user_id,
             """✅ گفتگوی شما توسط مشاور بسته شد.
 
-اگر دوباره نیاز به مشاوره داشتید، از دکمه زیر استفاده کنید.""",
-            reply_markup=closed_ticket_keyboard()
+اگر دوباره نیاز به مشاوره داشتید از دکمه «💬 حرف بزنیم» استفاده کنید.""",
+            reply_markup=main_menu()
         )
 
         bot.answer_callback_query(
@@ -271,45 +276,50 @@ def callback(call):
 
 def send_to_admin(message, ticket_id):
 
-    username = (
-        "@" + message.from_user.username
-        if message.from_user.username
-        else "ندارد"
+    if user_state.get(message.chat.id) != "advisor":
+        return
+
+    user_state.pop(message.chat.id, None)
+
+    save_message(
+        ticket_id,
+        "user",
+        message.text if message.content_type == "text" else "[media]"
     )
-
-    info = bot.send_message(
-        ADMIN_ID,
-        f"""🎫 تیکت #{ticket_id}
-
-👤 {message.from_user.first_name}
-🆔 {username}
-📌 USER_ID:{message.chat.id}""",
-        reply_markup=admin_close_btn(message.chat.id)
-    )
-
-    reply_map[info.message_id] = message.chat.id
 
     if message.content_type == "text":
 
         sent = bot.send_message(
             ADMIN_ID,
-            message.text,
-            reply_to_message_id=info.message_id
+            f"""💬 پیام جدید
+
+👤 {message.from_user.first_name}
+🆔 {message.chat.id}
+
+{message.text}""",
+            reply_markup=admin_close_btn(message.chat.id)
         )
 
     else:
 
-        sent = bot.forward_message(
-            ADMIN_ID,
-            message.chat.id,
-            message.message_id
+        sent = bot.copy_message(
+            chat_id=ADMIN_ID,
+            from_chat_id=message.chat.id,
+            message_id=message.message_id
         )
 
-    reply_map[sent.message_id] = message.chat.id
+        bot.send_message(
+            ADMIN_ID,
+            f"👤 {message.from_user.first_name}\n🆔 {message.chat.id}",
+            reply_to_message_id=sent.message_id,
+            reply_markup=admin_close_btn(message.chat.id)
+        )
+
+    reply_map[message.chat.id] = ticket_id
 
     bot.send_message(
         message.chat.id,
-        "✅ پیام شما برای مشاور ارسال شد."
+        "✅ پیام شما با موفقیت برای مشاور ارسال شد."
     )
 
 @bot.message_handler(
@@ -412,17 +422,33 @@ def admin_reply(message):
 )
 def user_chat(message):
 
-    ticket = get_open_ticket(message.chat.id)
+    state = user_state.get(message.chat.id)
 
-    if not ticket:
+    if state != "advisor":
         return
+
+    ticket_id = reply_map.get(message.chat.id)
+
+    if not ticket_id:
+        ticket = get_open_ticket(message.chat.id)
+
+        if not ticket:
+            user_state.pop(message.chat.id, None)
+            return
+
+        ticket_id = ticket[0]
 
     send_to_admin(
         message,
-        ticket[0]
+        ticket_id
     )
 
 def send_feedback(message):
+
+    if user_state.get(message.chat.id) != "feedback":
+        return
+
+    user_state.pop(message.chat.id, None)
 
     save_review(
         message.chat.id,
@@ -482,7 +508,8 @@ def send_feedback(message):
         """❤️ ممنون بابت امتیاز و نظرت.
 
 بازخورد شما برای بهتر شدن آکادمی آرَک
-خیلی ارزشمنده. 🌱"""
+خیلی ارزشمنده. 🌱""",
+        reply_markup=main_menu()
     )
     
 @bot.message_handler(
