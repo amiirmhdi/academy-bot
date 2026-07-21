@@ -104,25 +104,31 @@ def callback(call):
 
     elif call.data == "advisor":
 
-        ticket = get_open_ticket(call.message.chat.id)
+    ticket = get_open_ticket(call.message.chat.id)
 
-        if ticket:
-            ticket_id = ticket[0]
-        else:
-            ticket_id = create_ticket(call.message.chat.id)
+    if ticket:
+        ticket_id = ticket[0]
+    else:
+        ticket_id = create_ticket(call.message.chat.id)
 
-        reply_map[call.message.chat.id] = ticket_id
-        user_state[call.message.chat.id] = "advisor"
+    reply_map[call.message.chat.id] = ticket_id
+    user_state[call.message.chat.id] = "advisor"
 
-        bot.send_message(
-            call.message.chat.id,
-            """💬 پیام خود را بنویسید.
+    msg = bot.send_message(
+        call.message.chat.id,
+        """💬 پیام خود را بنویسید.
 
 مشاوران آکادمی آرَک در اولین فرصت پاسخ خواهند داد.
 
 اگر منصرف شدید از دکمه زیر استفاده کنید.""",
-            reply_markup=cancel_chat_keyboard()
-        )
+        reply_markup=cancel_chat_keyboard()
+    )
+
+    bot.register_next_step_handler(
+        msg,
+        send_to_admin,
+        ticket_id
+    )
 
     elif call.data == "feedback":
 
