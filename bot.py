@@ -92,7 +92,7 @@ def callback(call):
 
         return
 
-       elif call.data == "courses":
+    elif call.data == "courses":
 
         bot.edit_message_text(
             """📚 دوره‌ها
