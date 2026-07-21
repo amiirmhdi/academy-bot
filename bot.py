@@ -124,8 +124,7 @@ def callback(call):
             reply_markup=cancel_chat_keyboard()
         )
 
-
-        elif call.data == "feedback":
+    elif call.data == "feedback":
 
         bot.edit_message_text(
             """⭐ امتیاز و نظر
@@ -200,7 +199,6 @@ def callback(call):
             message_id=call.message.message_id,
             reply_markup=back_to_main()
         )
-
 
     elif call.data == "broadcast":
 
