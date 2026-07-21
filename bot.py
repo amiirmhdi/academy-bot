@@ -71,15 +71,7 @@ def callback(call):
 
     if call.data == "main_menu":
 
-        # اگر تیکت باز بود، ببند
         close_ticket(call.message.chat.id)
-
-        # پاک کردن وضعیت کاربر
-        user_state.pop(call.message.chat.id, None)
-        reply_map.pop(call.message.chat.id, None)
-
-        # حذف هر Step Handler فعال
-        bot.clear_step_handler_by_chat_id(call.message.chat.id)
 
         bot.edit_message_text(
             """🎓 آکادمی آرَک
@@ -91,6 +83,7 @@ def callback(call):
         )
 
         return
+
 
     elif call.data == "courses":
 
@@ -105,6 +98,7 @@ def callback(call):
             reply_markup=back_to_main()
         )
 
+
     elif call.data == "advisor":
 
         ticket = get_open_ticket(call.message.chat.id)
@@ -113,9 +107,6 @@ def callback(call):
             ticket_id = ticket[0]
         else:
             ticket_id = create_ticket(call.message.chat.id)
-
-        reply_map[call.message.chat.id] = ticket_id
-        user_state[call.message.chat.id] = "advisor"
 
         bot.edit_message_text(
             """💬 حرف بزنیم
@@ -138,6 +129,7 @@ def callback(call):
             send_to_admin,
             ticket_id
         )
+
 
     elif call.data == "feedback":
 
@@ -420,10 +412,6 @@ def admin_reply(message):
 )
 def user_chat(message):
 
-    # فقط وقتی کاربر داخل حالت مشاوره است
-    if user_state.get(message.chat.id) != "advisor":
-        return
-
     ticket = get_open_ticket(message.chat.id)
 
     if not ticket:
@@ -496,10 +484,6 @@ def send_feedback(message):
 بازخورد شما برای بهتر شدن آکادمی آرَک
 خیلی ارزشمنده. 🌱"""
     )
-
-    user_state.pop(message.chat.id, None)
-    reply_map.pop(message.chat.id, None)
-    bot.clear_step_handler_by_chat_id(message.chat.id)
     
 @bot.message_handler(
     func=lambda m: m.chat.id == ADMIN_ID and m.reply_to_message,
