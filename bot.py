@@ -73,12 +73,23 @@ def callback(call):
 
         bot.clear_step_handler_by_chat_id(call.message.chat.id)
 
+        # حذف پیام "پیام خود را ارسال کنید"
         prompt_id = reply_map.get(f"prompt_{call.message.chat.id}")
 
         if prompt_id:
             try:
                 bot.delete_message(call.message.chat.id, prompt_id)
                 del reply_map[f"prompt_{call.message.chat.id}"]
+            except:
+                pass
+
+        # حذف پیام "نظر یا پیشنهادت رو بنویس"
+        feedback_id = reply_map.get(f"feedback_{call.message.chat.id}")
+
+        if feedback_id:
+            try:
+                bot.delete_message(call.message.chat.id, feedback_id)
+                del reply_map[f"feedback_{call.message.chat.id}"]
             except:
                 pass
 
@@ -196,6 +207,8 @@ def callback(call):
 
 (نوشتن نظر کاملاً اختیاری است.)"""
         )
+
+        reply_map[f"feedback_{call.message.chat.id}"] = msg.message_id
 
         bot.register_next_step_handler(
             msg,
