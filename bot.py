@@ -73,6 +73,9 @@ def callback(call):
 
         close_ticket(call.message.chat.id)
 
+        # حذف هر Step Handler فعال
+        bot.clear_step_handler_by_chat_id(call.message.chat.id)
+
         bot.edit_message_text(
             """🎓 آکادمی آرَک
 
@@ -82,8 +85,17 @@ def callback(call):
             reply_markup=main_menu()
         )
 
-        return
+        # اگر پیام «پیام خود را ارسال کنید» وجود دارد حذف شود
+        try:
+            if call.message.reply_to_message:
+                bot.delete_message(
+                    call.message.chat.id,
+                    call.message.reply_to_message.message_id
+                )
+        except:
+            pass
 
+        return
 
     elif call.data == "courses":
 
@@ -107,6 +119,8 @@ def callback(call):
             ticket_id = ticket[0]
         else:
             ticket_id = create_ticket(call.message.chat.id)
+
+        user_state[call.message.chat.id] = "advisor"
 
         bot.edit_message_text(
             """💬 حرف بزنیم
@@ -411,6 +425,10 @@ def admin_reply(message):
     content_types=["text"]
 )
 def user_chat(message):
+
+    # فقط وقتی کاربر واقعاً داخل حالت مشاوره است
+    if user_state.get(message.chat.id) != "advisor":
+        return
 
     ticket = get_open_ticket(message.chat.id)
 
