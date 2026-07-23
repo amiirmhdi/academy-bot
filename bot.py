@@ -73,6 +73,15 @@ def callback(call):
 
         bot.clear_step_handler_by_chat_id(call.message.chat.id)
 
+        prompt_id = reply_map.get(f"prompt_{call.message.chat.id}")
+
+        if prompt_id:
+            try:
+                bot.delete_message(call.message.chat.id, prompt_id)
+                del reply_map[f"prompt_{call.message.chat.id}"]
+            except:
+                pass
+
         close_ticket(call.message.chat.id)
 
         bot.edit_message_text(
@@ -123,6 +132,8 @@ def callback(call):
             call.message.chat.id,
             "✍️ پیام خود را ارسال کنید:"
         )
+
+        reply_map[f"prompt_{call.message.chat.id}"] = msg.message_id
 
         bot.register_next_step_handler(
             msg,
